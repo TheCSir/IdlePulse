@@ -74,10 +74,11 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <!-- Status icon -->
-                <Border Grid.Column="0" Grid.RowSpan="4"
+                <Border Grid.Column="0" Grid.RowSpan="5"
                         x:Name="StatusIconBg"
                         Width="44" Height="44"
                         CornerRadius="22"
@@ -100,7 +101,7 @@
                            FontSize="16"
                            VerticalAlignment="Center" />
 
-                <ui:Button Grid.Column="2" Grid.Row="0" Grid.RowSpan="4"
+                <ui:Button Grid.Column="2" Grid.Row="0" Grid.RowSpan="5"
                            x:Name="EnableButton"
                            Click="EnableButton_Click"
                            VerticalAlignment="Center"
@@ -142,6 +143,44 @@
                              Background="{DynamicResource ControlFillColorTertiaryBrush}"
                              Foreground="#22C55E"
                              BorderThickness="0" />
+
+                <!-- Scan frequency line + high-freq warning chip -->
+                <StackPanel Grid.Column="1" Grid.Row="4"
+                            Orientation="Horizontal"
+                            Margin="0,8,12,0">
+                    <ui:SymbolIcon Symbol="Pulse24"
+                                   FontSize="12"
+                                   Opacity="0.55"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,4,0" />
+                    <TextBlock x:Name="ScanFrequencyText"
+                               Text="Scanning every 5s"
+                               FontSize="11"
+                               Opacity="0.55"
+                               VerticalAlignment="Center" />
+                    <Border x:Name="HighFreqWarning"
+                            Visibility="Collapsed"
+                            Margin="10,0,0,0"
+                            Padding="8,2"
+                            CornerRadius="4"
+                            Background="#33F59E0B"
+                            BorderBrush="#F59E0B"
+                            BorderThickness="1"
+                            VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Warning24"
+                                           FontSize="12"
+                                           Foreground="#F59E0B"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,4,0" />
+                            <TextBlock Text="High frequency monitoring"
+                                       FontSize="10"
+                                       FontWeight="SemiBold"
+                                       Foreground="#F59E0B"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
             </Grid>
         </Border>
 
@@ -272,7 +311,7 @@
                         </StackPanel>
                         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                             <ui:NumberBox x:Name="WarningSecondsBox"
-                                          Value="30" Minimum="5" Maximum="300"
+                                          Value="30" Minimum="5" Maximum="1800"
                                           ClearButtonEnabled="False"
                                           SpinButtonPlacementMode="Inline"
                                           Width="120" />

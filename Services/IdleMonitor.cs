@@ -31,7 +31,7 @@ public sealed class IdleMonitor : IDisposable
     }
 
     private static TimeSpan ClampInterval(int seconds)
-        => TimeSpan.FromSeconds(Math.Clamp(seconds, 1, 60));
+        => TimeSpan.FromSeconds(Math.Clamp(seconds, 1, 3600));
 
     public void Start()
     {

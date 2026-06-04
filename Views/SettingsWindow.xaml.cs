@@ -106,12 +106,15 @@ public partial class SettingsWindow : FluentWindow
         return Enum.TryParse<PowerAction>(tag, out var a) ? a : PowerAction.Shutdown;
     }
 
+    private const int MinThresholdSeconds = 5;
+    private const int HighFrequencyScanThresholdSec = 5;
+
     private int GetThresholdSeconds()
     {
         var h = (int)(HoursBox.Value ?? 0);
         var m = (int)(MinutesBox.Value ?? 0);
         var s = (int)(SecondsBox.Value ?? 0);
-        return Math.Max(1, h * 3600 + m * 60 + s);
+        return h * 3600 + m * 60 + s;
     }
 
     private void OnAnyChanged(object sender, RoutedEventArgs e)
@@ -135,6 +138,13 @@ public partial class SettingsWindow : FluentWindow
         var thresholdText = FormatDuration(TimeSpan.FromSeconds(_savedConfig.IdleSeconds));
         var action = _savedConfig.Action;
         var actionLower = action.ToString().ToLowerInvariant();
+
+        // Always-visible scan-frequency line + high-frequency warning chip.
+        var scanSec = Math.Clamp(_savedConfig.ScanIntervalSeconds, 1, 3600);
+        ScanFrequencyText.Text = $"Scanning every {FormatDuration(TimeSpan.FromSeconds(scanSec))}";
+        HighFreqWarning.Visibility = scanSec < HighFrequencyScanThresholdSec
+            ? Visibility.Visible
+            : Visibility.Collapsed;
 
         if (_savedConfig.Enabled)
         {
@@ -193,13 +203,24 @@ public partial class SettingsWindow : FluentWindow
     }
 
     /// <summary>
-    /// Footer pending-changes summary + Save button enable state.
+    /// Footer pending-changes summary + Save button enable state. Save is gated on both
+    /// dirty-vs-saved AND validity (idle threshold must be at least <see cref="MinThresholdSeconds"/>).
     /// </summary>
     private void UpdatePendingState()
     {
         var current = BuildConfigFromUi();
         var dirty = !current.ValueEquals(_savedConfig);
-        SaveButton.IsEnabled = dirty;
+        var validationError = ValidateConfig(current);
+        var valid = validationError == null;
+
+        SaveButton.IsEnabled = dirty && valid;
+
+        if (!valid)
+        {
+            PendingHeadline.Text = "Can't save — fix the highlighted field";
+            PendingDetail.Text = validationError!;
+            return;
+        }
 
         if (!dirty)
         {
@@ -210,6 +231,13 @@ public partial class SettingsWindow : FluentWindow
 
         PendingHeadline.Text = "Click Save to apply";
         PendingDetail.Text = SummariseConfig(current);
+    }
+
+    private static string? ValidateConfig(AppConfig cfg)
+    {
+        if (cfg.IdleSeconds < MinThresholdSeconds)
+            return $"Idle threshold must be at least {MinThresholdSeconds} seconds.";
+        return null;
     }
 
     private static string SummariseConfig(AppConfig cfg)

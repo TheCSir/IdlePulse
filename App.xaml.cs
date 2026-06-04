@@ -94,8 +94,12 @@ public partial class App : Application
     protected override void OnExit(ExitEventArgs e)
     {
         _trayApp?.Dispose();
-        _mutex?.ReleaseMutex();
-        _mutex?.Dispose();
+        if (_mutex != null)
+        {
+            // Only ReleaseMutex if we own it (not on the "already running" path).
+            try { _mutex.ReleaseMutex(); } catch (ApplicationException) { }
+            _mutex.Dispose();
+        }
         base.OnExit(e);
     }
 }
