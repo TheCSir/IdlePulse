@@ -13,10 +13,10 @@ The clean idle-shutdown utility Windows didn't ship with.
 [![WPF](https://img.shields.io/badge/UI-WPF%20%2B%20WPF--UI-2D3748?style=flat-square&logo=microsoft&logoColor=white)](https://github.com/lepoco/wpfui)
 [![C# 14](https://img.shields.io/badge/C%23-14.0-239120?style=flat-square&logo=csharp&logoColor=white)](https://learn.microsoft.com/dotnet/csharp/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/TheCSir/IdlePulse?style=flat-square&color=blue)](https://github.com/TheCSir/IdlePulse/releases)
-[![Downloads](https://img.shields.io/github/downloads/TheCSir/IdlePulse/total?style=flat-square&color=success)](https://github.com/TheCSir/IdlePulse/releases)
+[![Release](https://img.shields.io/github/v/release/TheCSir/IdlePulse?style=flat-square&color=blue)](https://github.com/TheCSir/IdlePulse/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/TheCSir/IdlePulse/total?style=flat-square&color=success)](https://github.com/TheCSir/IdlePulse/releases/latest)
 
-[Download installer](https://github.com/TheCSir/IdlePulse/releases) · [Report a bug](https://github.com/TheCSir/IdlePulse/issues) · [Read the tech deep-dive](INFO.md)
+[Download installer](https://github.com/TheCSir/IdlePulse/releases/latest) · [Portable exe](https://github.com/TheCSir/IdlePulse/releases/latest) · [Report a bug](https://github.com/TheCSir/IdlePulse/issues) · [Tech deep-dive](INFO.md)
 
 </div>
 
@@ -106,7 +106,7 @@ IdlePulse fills that gap with a small Fluent-styled tray app. It uses the **same
 
 ### Option A — Installer (recommended)
 
-[Download the latest `IdlePulse-Setup-X.Y.Z.exe` from Releases →](https://github.com/TheCSir/IdlePulse/releases)
+[Download the latest `IdlePulse-Setup-X.Y.Z.exe` from Releases →](https://github.com/TheCSir/IdlePulse/releases/latest)
 
 The installer:
 - ✅ Lets you pick **per-user (no admin)** or **per-machine** at runtime
