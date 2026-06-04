@@ -4,6 +4,9 @@ obj/
 publish/
 out/
 
+# Installer output (compiled Setup.exe — large binary, build via tools/build-installer.ps1)
+installer/dist/
+
 # Visual Studio
 *.user
 *.userprefs

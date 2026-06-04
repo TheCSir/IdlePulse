@@ -22,11 +22,17 @@ Windows has a built-in idle-sleep option, but no clean built-in "shut down on id
 
 The published binary is **self-contained** — no .NET install needed on the target machine.
 
-## Download / run
+## Install
 
-Grab the published `IdlePulse.exe` from `publish/` (or build from source — see below). Drop it anywhere and double-click. The tray icon appears bottom-right.
+**Option A — Installer (recommended)**
+Run `IdlePulse-Setup-<version>.exe` from the [Releases page](https://github.com/TheCSir/IdlePulse/releases). It will:
+- Let you pick per-user (no admin) or per-machine install
+- Add Start Menu (and optionally Desktop) shortcuts
+- Optionally add IdlePulse to Windows startup
+- Register an entry in Settings → Apps so you can uninstall cleanly
 
-To make it start with Windows: open Settings → enable "Run when Windows starts".
+**Option B — Portable**
+Grab `IdlePulse.exe` from `publish/` after building (see below) and drop it anywhere. Double-click to run; the tray icon appears bottom-right. Toggle autostart from inside the app's Settings.
 
 ## Build from source
 
@@ -36,6 +42,17 @@ dotnet publish IdlePulse.csproj -c Release -o publish
 ```
 
 Outputs a single self-contained `IdlePulse.exe` (~75 MB, includes runtime).
+
+### Building the installer
+
+Requires [Inno Setup 6.x or 7.x](https://jrsoftware.org/isinfo.php) (`ISCC.exe`).
+
+```powershell
+# Publishes the app then compiles the installer
+powershell -ExecutionPolicy Bypass -File tools\build-installer.ps1
+```
+
+Output: `installer\dist\IdlePulse-Setup-<version>.exe`
 
 ## Tech stack
 
@@ -62,10 +79,11 @@ IdlePulse/
 ├── TrayApp.cs             # Tray icon, context menu, lifecycle
 ├── Models/AppConfig.cs    # JSON-serializable config
 ├── Native/                # Win32 P/Invoke
-├── Services/              # IdleMonitor, ConfigStore, PowerActionExecutor, AutostartManager, Dialogs
+├── Services/              # IdleMonitor, ConfigStore, PowerActionExecutor, AutostartManager, Dialogs, Format
 ├── Views/                 # SettingsWindow, AppSettingsWindow, CountdownWindow
-├── Assets/IdlePulse.ico   # Multi-size app icon
-└── tools/                 # Icon generator, dev probes (excluded from build)
+├── Assets/                # Icon (.ico) + 512px PNG for in-window display
+├── installer/             # Inno Setup script (IdlePulse.iss)
+└── tools/                 # Icon generators, build-installer.ps1
 ```
 
 ## License
