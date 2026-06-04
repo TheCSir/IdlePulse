@@ -33,6 +33,7 @@
 
   <ItemGroup>
     <Resource Include="Assets\IdlePulse.ico" />
+    <Resource Include="Assets\IdlePulse-512.png" />
   </ItemGroup>
 
   <ItemGroup>

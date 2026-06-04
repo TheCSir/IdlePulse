@@ -18,28 +18,39 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <ui:TitleBar Grid.Row="0" Title="IdlePulse" />
+        <ui:TitleBar Grid.Row="0" Title="IdlePulse">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="/Assets/IdlePulse-512.png" />
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
 
         <!-- Hero header -->
         <Grid Grid.Row="1" Margin="28,8,28,12">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0">
-                <TextBlock Text="Idle Trigger"
+            <Image Grid.Column="0"
+                   Source="/Assets/IdlePulse-512.png"
+                   Width="56" Height="56"
+                   VerticalAlignment="Center"
+                   Margin="0,0,16,0"
+                   RenderOptions.BitmapScalingMode="HighQuality" />
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Text="IdlePulse"
                            FontSize="28"
                            FontWeight="SemiBold" />
                 <TextBlock Text="Automatically shut down, sleep, hibernate, or lock when idle."
                            Opacity="0.7"
                            Margin="0,4,0,0" />
             </StackPanel>
-            <ui:Button Grid.Column="1"
+            <ui:Button Grid.Column="2"
                        x:Name="AppSettingsButton"
                        VerticalAlignment="Center"
                        Appearance="Secondary"
                        Padding="10"
-                       ToolTip="App settings"
+                       ToolTip="Settings"
                        Click="AppSettingsButton_Click">
                 <ui:SymbolIcon Symbol="Settings24" FontSize="18" />
             </ui:Button>

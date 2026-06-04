@@ -1,6 +1,5 @@
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -42,11 +41,6 @@ public partial class App : Application
         base.OnStartup(e);
         _trayApp = new TrayApp();
         _trayApp.Start();
-
-        if (e.Args.Contains("--test-settings"))
-        {
-            Dispatcher.BeginInvoke(new Action(() => _trayApp?.OpenSettingsForTest()));
-        }
     }
 
     private static void ShowAlreadyRunningDialog()

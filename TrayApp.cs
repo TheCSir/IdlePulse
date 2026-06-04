@@ -24,10 +24,8 @@ public sealed class TrayApp : IDisposable
     private SettingsWindow? _settingsWindow;
     private CountdownWindow? _countdownWindow;
 
-    private MenuItem? _statusHeaderItem;
     private TextBlock? _statusHeaderTitle;
     private TextBlock? _statusHeaderDetail;
-    private MenuItem? _toggleItem;
     private TextBlock? _toggleItemText;
     private SymbolIcon? _toggleItemIcon;
 
@@ -73,7 +71,7 @@ public sealed class TrayApp : IDisposable
             Margin = new Thickness(0, 2, 0, 0)
         };
 
-        _statusHeaderItem = new MenuItem
+        var statusHeaderItem = new MenuItem
         {
             Header = new StackPanel
             {
@@ -84,7 +82,7 @@ public sealed class TrayApp : IDisposable
             IsEnabled = false,
             StaysOpenOnClick = true
         };
-        menu.Items.Add(_statusHeaderItem);
+        menu.Items.Add(statusHeaderItem);
 
         menu.Items.Add(new Separator());
 
@@ -100,7 +98,7 @@ public sealed class TrayApp : IDisposable
             Text = "Disable",
             VerticalAlignment = VerticalAlignment.Center
         };
-        _toggleItem = new MenuItem
+        var toggleItem = new MenuItem
         {
             Header = new StackPanel
             {
@@ -108,8 +106,8 @@ public sealed class TrayApp : IDisposable
                 Children = { _toggleItemIcon, _toggleItemText }
             }
         };
-        _toggleItem.Click += (_, _) => ToggleEnabled();
-        menu.Items.Add(_toggleItem);
+        toggleItem.Click += (_, _) => ToggleEnabled();
+        menu.Items.Add(toggleItem);
 
         // Settings
         var settingsItem = new MenuItem
@@ -188,8 +186,6 @@ public sealed class TrayApp : IDisposable
             _settingsWindow.ApplyExternalConfig(_config);
         }
     }
-
-    public void OpenSettingsForTest() => OpenSettings();
 
     private void OpenSettings()
     {

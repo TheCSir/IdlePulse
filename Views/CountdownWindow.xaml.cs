@@ -10,10 +10,8 @@ public partial class CountdownWindow : FluentWindow
     private readonly DispatcherTimer _timer;
     private readonly int _total;
     private int _remaining;
-    private bool _cancelled;
     private bool _fired;
 
-    public bool Cancelled => _cancelled;
     public bool Fired => _fired;
 
     public CountdownWindow(PowerAction action, int seconds)
@@ -57,7 +55,6 @@ public partial class CountdownWindow : FluentWindow
 
     private void CancelButton_Click(object sender, RoutedEventArgs e)
     {
-        _cancelled = true;
         _timer.Stop();
         Close();
     }
