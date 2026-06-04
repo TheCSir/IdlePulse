@@ -238,15 +238,7 @@ public sealed class TrayApp : IDisposable
             : "IdlePulse — paused";
     }
 
-    private static string FormatDuration(TimeSpan ts)
-    {
-        if (ts.TotalSeconds < 1) return "0s";
-        var parts = new List<string>();
-        if (ts.Hours > 0) parts.Add($"{ts.Hours}h");
-        if (ts.Minutes > 0) parts.Add($"{ts.Minutes}m");
-        if (ts.Seconds > 0 || parts.Count == 0) parts.Add($"{ts.Seconds}s");
-        return string.Join(" ", parts);
-    }
+    private static string FormatDuration(TimeSpan ts) => Format.Duration(ts);
 
     public void Dispose()
     {

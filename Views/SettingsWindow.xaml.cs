@@ -41,6 +41,17 @@ public partial class SettingsWindow : FluentWindow
         _statusTimer.Tick += (_, _) => UpdateLiveBanner();
         _statusTimer.Start();
 
+        // Pause the 1 Hz banner when the user can't see it (minimized or window hidden).
+        StateChanged += (_, _) =>
+        {
+            if (WindowState == WindowState.Minimized) _statusTimer.Stop();
+            else if (IsVisible) _statusTimer.Start();
+        };
+        IsVisibleChanged += (_, _) =>
+        {
+            if (IsVisible && WindowState != WindowState.Minimized) _statusTimer.Start();
+            else _statusTimer.Stop();
+        };
         Closed += (_, _) => _statusTimer.Stop();
 
         UpdateAll();
@@ -208,15 +219,7 @@ public partial class SettingsWindow : FluentWindow
         return $"{action} after {threshold} idle, with a {cfg.WarningSeconds}s warning";
     }
 
-    private static string FormatDuration(TimeSpan ts)
-    {
-        if (ts.TotalSeconds < 1) return "0s";
-        var parts = new List<string>();
-        if (ts.Hours > 0) parts.Add($"{ts.Hours}h");
-        if (ts.Minutes > 0) parts.Add($"{ts.Minutes}m");
-        if (ts.Seconds > 0 || parts.Count == 0) parts.Add($"{ts.Seconds}s");
-        return string.Join(" ", parts);
-    }
+    private static string FormatDuration(TimeSpan ts) => Format.Duration(ts);
 
     private void EnableButton_Click(object sender, RoutedEventArgs e)
     {
