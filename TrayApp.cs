@@ -24,6 +24,11 @@ public sealed class TrayApp : IDisposable
     private SettingsWindow? _settingsWindow;
     private CountdownWindow? _countdownWindow;
 
+    private static readonly BitmapImage _defaultIconSource =
+        new(new Uri("pack://application:,,,/Assets/IdlePulse.ico", UriKind.Absolute));
+    private static readonly BitmapImage _activeIconSource =
+        new(new Uri("pack://application:,,,/Assets/IdlePulse-active.ico", UriKind.Absolute));
+
     private TextBlock? _statusHeaderTitle;
     private TextBlock? _statusHeaderDetail;
     private TextBlock? _toggleItemText;
@@ -39,7 +44,7 @@ public sealed class TrayApp : IDisposable
         _trayIcon = new TaskbarIcon
         {
             ToolTipText = "IdlePulse",
-            IconSource = new BitmapImage(new Uri("pack://application:,,,/Assets/IdlePulse.ico", UriKind.Absolute)),
+            IconSource = _defaultIconSource,
             ContextMenu = BuildContextMenu()
         };
         _trayIcon.TrayMouseDoubleClick += (_, _) => OpenSettings();
@@ -50,6 +55,20 @@ public sealed class TrayApp : IDisposable
         _monitor.Start();
 
         UpdateTooltip();
+
+        // On manual launch (system up > 90s): blink icon + open settings.
+        // On Windows startup (system up < 90s): stay silent.
+        if (Environment.TickCount64 > 90_000)
+        {
+            OpenSettings();
+        }
+    }
+
+    private void UpdateTrayIconState()
+    {
+        if (_trayIcon == null) return;
+        var isUiOpen = _settingsWindow != null || _countdownWindow != null;
+        _trayIcon.IconSource = isUiOpen ? _activeIconSource : _defaultIconSource;
     }
 
     private ContextMenu BuildContextMenu()
@@ -204,8 +223,9 @@ public sealed class TrayApp : IDisposable
             if (_config.Enabled) _monitor?.Start(); else _monitor?.Stop();
             UpdateTooltip();
         };
-        _settingsWindow.Closed += (_, _) => _settingsWindow = null;
+        _settingsWindow.Closed += (_, _) => { _settingsWindow = null; UpdateTrayIconState(); };
         _settingsWindow.Show();
+        UpdateTrayIconState();
     }
 
     private void OnIdleThresholdReached(object? sender, EventArgs e)
@@ -220,6 +240,7 @@ public sealed class TrayApp : IDisposable
             var fired = _countdownWindow?.Fired ?? false;
             var action = _config.Action;
             _countdownWindow = null;
+            UpdateTrayIconState();
             _monitor?.Reset();
             if (fired)
             {
@@ -227,6 +248,7 @@ public sealed class TrayApp : IDisposable
             }
         };
         _countdownWindow.Show();
+        UpdateTrayIconState();
         _countdownWindow.Activate();
     }
 
@@ -237,6 +259,7 @@ public sealed class TrayApp : IDisposable
             ? $"IdlePulse — {_config.Action} after {FormatDuration(TimeSpan.FromSeconds(_config.IdleSeconds))} idle"
             : "IdlePulse — paused";
     }
+
 
     private static string FormatDuration(TimeSpan ts) => Format.Duration(ts);
 
