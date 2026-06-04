@@ -1,134 +1,171 @@
+<div align="center">
+
+<img src="Assets/IdlePulse-512.png" alt="IdlePulse" width="160" />
+
 # IdlePulse
 
-A small Windows tray utility that **shuts down, sleeps, hibernates, or locks your PC after a period of inactivity** — with a configurable warning countdown so you can cancel.
+**Auto-shutdown, sleep, hibernate, or lock your PC after inactivity — with a cancellable warning countdown.**
 
-Windows has a built-in idle-*sleep* option, but no clean built-in *idle-shutdown* option. IdlePulse fills that gap with a Fluent UI, real idle detection (`GetLastInputInfo`), and smart skips for fullscreen / presentation modes.
+The clean idle-shutdown utility Windows didn't ship with.
 
-## Features
+[![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D6?style=flat-square&logo=windows&logoColor=white)](https://www.microsoft.com/windows)
+[![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4?style=flat-square&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/download/dotnet/10.0)
+[![WPF](https://img.shields.io/badge/UI-WPF%20%2B%20WPF--UI-2D3748?style=flat-square&logo=microsoft&logoColor=white)](https://github.com/lepoco/wpfui)
+[![C# 14](https://img.shields.io/badge/C%23-14.0-239120?style=flat-square&logo=csharp&logoColor=white)](https://learn.microsoft.com/dotnet/csharp/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/TheCSir/IdlePulse?style=flat-square&color=blue)](https://github.com/TheCSir/IdlePulse/releases)
+[![Downloads](https://img.shields.io/github/downloads/TheCSir/IdlePulse/total?style=flat-square&color=success)](https://github.com/TheCSir/IdlePulse/releases)
 
-### Idle action
-- Trigger **Shutdown / Sleep / Hibernate / Lock** after no keyboard or mouse input for a configurable threshold
-- Threshold expressed as hours + minutes + seconds (default 30 minutes)
-- **Warning countdown** with a centered progress ring and big Cancel button — set the warning to 5–300s; the action only fires if you don't cancel
-- **Graceful shutdown** via `shutdown.exe /s /t 0` (also covers privilege handling automatically)
-- Sleep / Hibernate via `SetSuspendState`, Lock via `LockWorkStation`
+[Download installer](https://github.com/TheCSir/IdlePulse/releases) · [Report a bug](https://github.com/TheCSir/IdlePulse/issues) · [Read the tech deep-dive](INFO.md)
 
-### Smart skips
-- **Skip when a fullscreen app is running** (games, video) — uses `SHQueryUserNotificationState`
-- **Skip during presentation mode** (PowerPoint, Zoom screen-share, etc.)
-- **Auto-pause on session lock** and re-enable on unlock with a 10-second grace period
-- **Cooldown after wake** — after resuming from sleep, idle monitoring is paused for 1 minute so the device doesn't immediately re-trigger
+</div>
 
-### Tray UI
-- Right-click menu shows live state (Active / Paused), the configured action, and threshold
-- One-click **Enable / Disable** toggle directly in the tray menu
-- Settings… and Exit entries with Fluent symbol icons
-- **Single-instance** enforced via a named Mutex; second launch is rejected with a Fluent dialog
+---
 
-### Settings window (main)
-- Live status banner with state icon, headline, action summary, and a progress bar that fills as idle approaches threshold
-- Action picker (Combo with icons), idle threshold (hr/min/sec inputs), warning seconds, smart-skip toggles, autostart toggle
-- **Save button gated on dirty state** — your edits are only applied when you click Save (no live drift)
-- "Click Save to apply" footer summarises the new config in plain English (e.g. *"Lock after 10s idle, with a 30s warning"*)
-- Gear button opens the Settings (App-level) dialog
+## Why IdlePulse?
 
-### Settings (App-level)
-- **Idle scan interval** (1–60s) — how often `GetLastInputInfo` is polled
-- **Configuration file** — read-only path display + Open folder + Copy path
-- **Crash log** — last-modified timestamp, size, Open log, Clear log
-- **Clear startup entries** — safely scans `HKCU\...\Run` and the Startup folder for IdlePulse entries and removes them
-- **Reset app settings** — restores scan interval to default; preserves your idle-trigger settings
-- **About** — version, runtime, executable path
+Windows can put your PC to **sleep** after a period of inactivity. It cannot **shut it down**. The only stock workaround is a 10-step Task Scheduler dance whose idle definition is unreliable enough to misfire after ~10 minutes when you asked for 2 hours.
 
-## Requirements
+IdlePulse fills that gap with a small Fluent-styled tray app. It uses the **same Win32 API Windows itself uses** for idle detection (`GetLastInputInfo`), polls at sub-second precision, and only ever fires when the user is genuinely away — never during fullscreen video, gaming, or presentations.
 
-- Windows 10 (1809+) or Windows 11
-- x64
+---
 
-The published binary is **self-contained** — no .NET install needed on the target machine.
+## Screenshots
 
-## Install
+<div align="center">
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="docs/screenshots/main-active.png" alt="Main window — Active" width="380" /><br/>
+      <sub><b>Active — live idle tracking + progress bar</b></sub>
+    </td>
+    <td align="center">
+      <img src="docs/screenshots/main-paused.png" alt="Main window — Paused" width="380" /><br/>
+      <sub><b>Paused — one click to re-enable</b></sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2">
+      <img src="docs/screenshots/app-settings.png" alt="App settings" width="480" /><br/>
+      <sub><b>Settings — scan interval, file paths, crash log, startup cleanup</b></sub>
+    </td>
+  </tr>
+</table>
+
+</div>
+
+---
+
+## ✨ Features
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+
+### 🎯 Smart idle detection
+- Same `GetLastInputInfo` Win32 API Windows uses
+- Configurable scan interval (1s – 1h)
+- High-frequency monitoring warning when scan < 5s
+
+### 🛡️ Smart skips
+- Pauses during fullscreen apps (games, video)
+- Pauses during presentation mode
+- Auto-resumes on session unlock with grace period
+
+### 💾 Survive resume
+- 1-minute cooldown after wake from sleep
+- Won't immediately re-trigger when you come back
+
+    </td>
+    <td width="50%" valign="top">
+
+### ⚡ Four idle actions
+- **Shutdown** — graceful via `shutdown.exe`
+- **Sleep** — `SetSuspendState` to RAM
+- **Hibernate** — `SetSuspendState` to disk
+- **Lock** — `LockWorkStation`
+
+### ⏱️ Cancellable warning
+- Topmost notification with progress ring
+- Big Cancel button + animated countdown
+- 5s – 30 min configurable
+
+### 🎨 Modern Fluent UI
+- Mica backdrop, dark theme, rounded corners
+- Live status banner with progress bar
+- Tray menu with live state header
+
+    </td>
+  </tr>
+</table>
+
+---
+
+## 🚀 Install
 
 ### Option A — Installer (recommended)
 
-Download `IdlePulse-Setup-<version>.exe` from the [Releases page](https://github.com/TheCSir/IdlePulse/releases) and run it. The installer:
+[Download the latest `IdlePulse-Setup-X.Y.Z.exe` from Releases →](https://github.com/TheCSir/IdlePulse/releases)
 
-- Lets you pick **per-user** (no admin) or **per-machine** (admin) install at runtime
-- Always creates a Start Menu shortcut
-- Optional **Desktop shortcut**
-- Optional **Run at Windows startup** (sets the per-user `HKCU\...\Run` registry value)
-- Optional **Launch IdlePulse after install**
-- Registers an entry in **Settings → Apps** for clean uninstall (also kills any running instance and removes autostart entries)
+The installer:
+- ✅ Lets you pick **per-user (no admin)** or **per-machine** at runtime
+- ✅ Adds Start Menu (and optionally Desktop) shortcuts
+- ✅ Optionally enables **Run at Windows startup**
+- ✅ Optionally launches IdlePulse after install
+- ✅ Registers a clean uninstall entry in Settings → Apps
 
 ### Option B — Portable
 
-Grab `IdlePulse.exe` from `publish/` after building (see below) or attach it from a release. Drop it anywhere and double-click — the tray icon appears bottom-right.
+Grab `IdlePulse.exe` from `publish/` after building, or attach it from a release. Drop it anywhere and double-click — the tray icon appears bottom-right.
 
-To make the portable build start with Windows: open Settings → enable "Run when Windows starts" (writes `HKCU\Software\Microsoft\Windows\CurrentVersion\Run\IdlePulse`).
+---
 
-## Build from source
+## 🧰 Tech stack
+
+| Layer | Tech |
+|---|---|
+| Runtime | **.NET 10** (LTS, self-contained, single-file) |
+| Language | **C# 14** |
+| UI | **WPF** + **[WPF-UI 4.3](https://github.com/lepoco/wpfui)** (Fluent design — Mica, dark theme, rounded corners) |
+| Tray icon | **[Hardcodet.NotifyIcon.Wpf](https://github.com/hardcodet/wpf-notifyicon)** |
+| Idle / power APIs | **Win32 P/Invoke** — `GetLastInputInfo`, `SetSuspendState`, `LockWorkStation`, `SHQueryUserNotificationState` |
+| Config | **`System.Text.Json`** at `%APPDATA%\IdlePulse\config.json` |
+| Installer | **[Inno Setup 6+](https://jrsoftware.org/isinfo.php)** |
+| Distribution | Single-file self-contained `.exe` (~75 MB) or Setup.exe (~70 MB) |
+
+---
+
+## 🛠️ Build from source
 
 ```powershell
-# Requires .NET 10 SDK (https://dotnet.microsoft.com/download/dotnet/10.0)
+# Requires .NET 10 SDK from https://dotnet.microsoft.com/download/dotnet/10.0
 dotnet publish IdlePulse.csproj -c Release -o publish
 ```
 
-Outputs a single self-contained `IdlePulse.exe` (~75 MB, includes the .NET runtime).
+Outputs a single self-contained `IdlePulse.exe` (~75 MB).
 
-### Building the installer
+### Build the installer
 
-Requires [Inno Setup 6.x or 7.x](https://jrsoftware.org/isinfo.php) (`ISCC.exe`). The script auto-discovers `ISCC.exe` from common paths or `$env:ISCC`.
+Requires [Inno Setup 6.x or 7.x](https://jrsoftware.org/isinfo.php). The script auto-discovers `ISCC.exe`.
 
 ```powershell
-# Publishes the app then compiles the installer
 powershell -ExecutionPolicy Bypass -File tools\build-installer.ps1
 ```
 
-Output: `installer\dist\IdlePulse-Setup-<version>.exe` (~70 MB)
+Output: `installer\dist\IdlePulse-Setup-<version>.exe`
 
-### Regenerating the icon
+---
 
-The `.ico` is built from the brand source PNG (`%USERPROFILE%\Downloads\generated-image.png` by default; override via `$env:IDLEPULSE_SOURCE`). Re-run if the source changes:
+## 📋 Requirements
 
-```powershell
-powershell -ExecutionPolicy Bypass -File tools\generate-icon.ps1   # writes Assets\IdlePulse.ico
-powershell -ExecutionPolicy Bypass -File tools\generate-png.ps1    # writes Assets\IdlePulse-512.png
-```
+- **OS:** Windows 10 (1809+) or Windows 11
+- **Architecture:** x64
+- **Runtime:** None — the published binary is self-contained
 
-## Tech stack
+---
 
-- **.NET 10** + **WPF** with [WPF-UI](https://github.com/lepoco/wpfui) for Fluent design (Mica backdrop, dark theme, rounded corners)
-- **[Hardcodet.NotifyIcon.Wpf](https://github.com/hardcodet/wpf-notifyicon)** for the tray icon
-- **P/Invoke** to Win32 (`GetLastInputInfo`, `SetSuspendState`, `LockWorkStation`, `SHQueryUserNotificationState`)
-- **Single-file, self-contained publish** for portable / installer distribution
-- **[Inno Setup](https://jrsoftware.org/isinfo.php)** for the installer
-
-## Configuration
-
-Settings are saved as JSON at `%APPDATA%\IdlePulse\config.json`. Crash logs (if any) at `%APPDATA%\IdlePulse\crash.log`. The App Settings dialog has buttons to open these locations or copy the path.
-
-If you previously used the older `AutoShutdown` build, IdlePulse will:
-- Auto-import `%APPDATA%\AutoShutdown\config.json` on first launch
-- Remove the legacy `HKCU\...\Run\AutoShutdown` registry value
-
-so your old settings carry over and the old build doesn't keep starting alongside the new one.
-
-## How idle is detected
-
-Polls `GetLastInputInfo` (Win32) every N seconds (configurable, default 5). This is the same API Windows itself uses for idle-sleep — millisecond-precise, keyboard + mouse only, doesn't watch CPU/disk (which is what makes Task Scheduler's idle trigger unreliable). Polling cost is effectively zero — one Win32 call + integer compare.
-
-Before firing, IdlePulse also calls `SHQueryUserNotificationState` to skip when the user is presenting, in fullscreen, or otherwise marked busy by Windows.
-
-## Performance
-
-- **CPU:** effectively 0% at rest (one P/Invoke every 5s by default)
-- **RAM:** ~150 MB working set — typical for a Fluent-themed WPF app on .NET 10
-- **Disk:** zero I/O after startup; config is loaded once into memory
-- **Battery:** the app does not prevent sleep — it cooperates with Windows' power management
-
-The 1 Hz live status banner in Settings is paused while the window is minimized or hidden.
-
-## Project layout
+## 📂 Project layout
 
 ```
 IdlePulse/
@@ -140,11 +177,25 @@ IdlePulse/
 │                          # AutostartManager, Dialogs, Format
 ├── Views/                 # SettingsWindow, AppSettingsWindow, CountdownWindow
 ├── Assets/                # Icon (.ico) + 512px PNG for in-window display
-├── installer/             # Inno Setup script (IdlePulse.iss)
-└── tools/                 # generate-icon.ps1, generate-png.ps1,
-                           # build-installer.ps1
+├── installer/             # Inno Setup script
+├── tools/                 # build-installer.ps1, generate-icon.ps1
+└── docs/                  # screenshots/
 ```
 
-## License
+For architecture, design decisions, performance notes, migration logic, and other deep-dives, see **[INFO.md](INFO.md)**.
+
+---
+
+## 📄 License
 
 MIT — see [LICENSE](LICENSE).
+
+---
+
+<div align="center">
+
+Built by <b><a href="https://github.com/TheCSir">TheCSir</a></b>
+
+If IdlePulse saved you electricity, give the repo a ⭐
+
+</div>

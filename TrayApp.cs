@@ -187,7 +187,7 @@ public sealed class TrayApp : IDisposable
         }
     }
 
-    private void OpenSettings()
+    public void OpenSettings()
     {
         if (_settingsWindow != null)
         {
