@@ -1,0 +1,80 @@
+# Build output
+bin/
+obj/
+publish/
+out/
+
+# Visual Studio
+*.user
+*.userprefs
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+*.vspscc
+*.vssscc
+
+# Rider / JetBrains
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+*.swp
+*~
+
+# .NET
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+*.dll
+*.pdb
+*.exe
+*.cache
+project.lock.json
+project.fragment.lock.json
+*.nupkg
+*.snupkg
+
+# Test results
+TestResults/
+[Tt]est[Rr]esult*/
+*.trx
+*.coverage
+*.coveragexml
+
+# NuGet
+.nuget/
+packages/
+!packages/build/
+*.nuget.props
+*.nuget.targets
+
+# Generated / temp
+*.g.cs
+*.g.i.cs
+*.tmp
+*.bak
+
+# Local secrets (never commit)
+*.env
+.env.*
+secrets.*.json
+appsettings.Local.json
+appsettings.Development.json
+
+# Claude config (do not commit)
+.claude/

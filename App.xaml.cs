@@ -1,0 +1,107 @@
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Threading;
+
+namespace IdlePulse;
+
+public partial class App : Application
+{
+    private const string MutexName = "Global\\IdlePulse_SingleInstance_8F3C2A";
+    private Mutex? _mutex;
+    private TrayApp? _trayApp;
+
+    private static readonly string LogPath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        "IdlePulse", "crash.log");
+
+    protected override void OnStartup(StartupEventArgs e)
+    {
+        AppDomain.CurrentDomain.UnhandledException += (_, args) =>
+            LogCrash("AppDomain", args.ExceptionObject as Exception);
+        DispatcherUnhandledException += (_, args) =>
+        {
+            LogCrash("Dispatcher", args.Exception);
+            args.Handled = true;
+        };
+        TaskScheduler.UnobservedTaskException += (_, args) =>
+        {
+            LogCrash("Task", args.Exception);
+            args.SetObserved();
+        };
+
+        _mutex = new Mutex(initiallyOwned: true, MutexName, out bool createdNew);
+        if (!createdNew)
+        {
+            ShowAlreadyRunningDialog();
+            Shutdown();
+            return;
+        }
+
+        base.OnStartup(e);
+        _trayApp = new TrayApp();
+        _trayApp.Start();
+
+        if (e.Args.Contains("--test-settings"))
+        {
+            Dispatcher.BeginInvoke(new Action(() => _trayApp?.OpenSettingsForTest()));
+        }
+    }
+
+    private static void ShowAlreadyRunningDialog()
+    {
+        var box = new Wpf.Ui.Controls.MessageBox
+        {
+            Title = "IdlePulse",
+            Content = "IdlePulse is already running. Check the system tray.",
+            CloseButtonText = "OK",
+            IsPrimaryButtonEnabled = false,
+            IsSecondaryButtonEnabled = false
+        };
+        var task = box.ShowDialogAsync();
+        var frame = new DispatcherFrame();
+        task.GetAwaiter().OnCompleted(() => frame.Continue = false);
+        Dispatcher.PushFrame(frame);
+    }
+
+    private static void LogCrash(string source, Exception? ex)
+    {
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(LogPath)!);
+            var msg = $"=== {DateTime.Now:O} [{source}] ===\n{ex}\n\n";
+            File.AppendAllText(LogPath, msg);
+
+            try
+            {
+                var box = new Wpf.Ui.Controls.MessageBox
+                {
+                    Title = $"IdlePulse — Error ({source})",
+                    Content = $"{ex?.Message}\n\nDetails written to:\n{LogPath}",
+                    CloseButtonText = "OK",
+                    IsPrimaryButtonEnabled = false,
+                    IsSecondaryButtonEnabled = false
+                };
+                var task = box.ShowDialogAsync();
+                var frame = new DispatcherFrame();
+                task.GetAwaiter().OnCompleted(() => frame.Continue = false);
+                Dispatcher.PushFrame(frame);
+            }
+            catch
+            {
+                MessageBox.Show($"IdlePulse error ({source}):\n\n{ex?.Message}\n\nDetails written to:\n{LogPath}",
+                    "IdlePulse — Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        catch { }
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        _trayApp?.Dispose();
+        _mutex?.ReleaseMutex();
+        _mutex?.Dispose();
+        base.OnExit(e);
+    }
+}
